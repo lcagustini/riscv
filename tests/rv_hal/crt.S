@@ -25,11 +25,11 @@ _start:
 //  mul t2,t1,t0
 //  sub sp,sp,t2
   jal main
-  sbreak
+  ebreak
 
 //_interrupt_handler:
 //  jal main
-//  sbreak
+//  ebreak
 
 .bss
 .align 8

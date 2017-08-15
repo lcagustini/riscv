@@ -43,7 +43,7 @@ AC_ISA(riscv){
   ac_instr<Type_I> ADDI, SLTI, SLTIU, XORI, ORI, ANDI;
   ac_instr<Type_I> JALR;
   ac_instr<Type_I> SLLI, SRLI, SRAI;
-  ac_instr<Type_I> SCALL, SBREAK, RDCYCLE, RDCYCLEH, RDTIME, RDTIMEH, RDINSTRET;
+  ac_instr<Type_I> SCALL, EBREAK, RDCYCLE, RDCYCLEH, RDTIME, RDTIMEH, RDINSTRET;
   ac_instr<Type_I> RDINSTRETH;
 
   ac_instr<Type_S> SB, SH, SW;
@@ -221,8 +221,8 @@ AC_ISA(riscv){
     SCALL.set_decoder(imm4 = 0, imm3 = 0, imm2 = 0, imm1 = 0, rs1 = 0x00,
                       funct3 = 0x0, rd = 0x00, op = 0x73);
 
-    SBREAK.set_asm("SBREAK");
-    SBREAK.set_decoder(imm4 = 0, imm3 = 0, imm2 = 0, imm1 = 1, rs1 = 0x00,
+    EBREAK.set_asm("EBREAK");
+    EBREAK.set_decoder(imm4 = 0, imm3 = 0, imm2 = 0, imm1 = 1, rs1 = 0x00,
                        funct3 = 0x0, rd = 0x00, op = 0x73);
 
     RDCYCLE.set_asm("RDCYCLE %reg", rd);

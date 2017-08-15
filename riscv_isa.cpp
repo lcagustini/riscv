@@ -371,11 +371,11 @@ void ac_behavior(SCALL) {
   stop();
 }
 
-// Instruction SBREAK behavior method.
-void ac_behavior(SBREAK) {
-  dbg_printf("SBREAK\n");
+// Instruction EBREAK behavior method.
+void ac_behavior(EBREAK) {
+  dbg_printf("EBREAK\n");
   printf("Breakpoint\n\n");
-  stop();
+  stop(0);
 }
 
 // Instruction RDCYCLE behavior method.
