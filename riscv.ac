@@ -22,7 +22,7 @@ AC_ARCH(riscv) {
   ac_reg frm;
   ac_reg fcsr;
 
-  ac_wordsize 32;
+  ac_wordsize 64;
 
   ARCH_CTOR(riscv) {
     ac_isa("riscv_isa.ac");
