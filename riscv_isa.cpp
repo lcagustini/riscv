@@ -430,30 +430,91 @@ void ac_behavior(FENCE_I) { dbg_printf("FENCE_I r%d\n", rd); }
 // Instruction CSRRW behavior method.
 void ac_behavior(CSRRW) {
     dbg_printf("CSRRW csr:%d\n", csr);
-    ac_word tmp = RB[rd];
-    ac_reg<riscv_parms::ac_word> mapped = csr_map(csr);
-    if(rd != 0x0){
-        RB[rd] = mapped;
+
+    if (rd != 0x0) {
+        switch (csr) {
+            case 0x2:
+                RB[rd] = frm;
+                break;
+            case 0x3:
+                RB[rd] = fcsr;
+                break;
+            default:
+                RB[rd] = fflags;
+                break;
+        }
     }
-    mapped = tmp;
+    switch (csr) {
+        case 0x2:
+            frm = RB[rs1];
+            break;
+        case 0x3:
+            fcsr = RB[rs1];
+            break;
+        default:
+            fcsr = RB[rs1];
+            break;
+    }
 }
 
 // Instruction CSRRS behavior method.
 void ac_behavior(CSRRS) {
     dbg_printf("CSRRS csr:%d\n", csr);
-    ac_reg<riscv_parms::ac_word> mapped = csr_map(csr);
-    ac_word tmp = RB[rd];
-    RB[rd] = mapped;
-    mapped |= tmp;
+
+    if (rd != 0x0) {
+        switch (csr) {
+            case 0x2:
+                RB[rd] = frm;
+                break;
+            case 0x3:
+                RB[rd] = fcsr;
+                break;
+            default:
+                RB[rd] = fflags;
+                break;
+        }
+    }
+    switch (csr) {
+        case 0x2:
+            frm |= RB[rs1];
+            break;
+        case 0x3:
+            fcsr |= RB[rs1];
+            break;
+        default:
+            fcsr |= RB[rs1];
+            break;
+    }
 }
 
 // Instruction CSRRC behavior method.
 void ac_behavior(CSRRC) {
     dbg_printf("CSRRC csr:%d\n", csr);
-    ac_reg<riscv_parms::ac_word> mapped = csr_map(csr);
-    ac_word tmp = RB[rd];
-    RB[rd] = mapped;
-    mapped &= ~tmp;
+
+    if (rd != 0x0) {
+        switch (csr) {
+            case 0x2:
+                RB[rd] = frm;
+                break;
+            case 0x3:
+                RB[rd] = fcsr;
+                break;
+            default:
+                RB[rd] = fflags;
+                break;
+        }
+    }
+    switch (csr) {
+        case 0x2:
+            frm &= ~RB[rs1];
+            break;
+        case 0x3:
+            fcsr &= ~RB[rs1];
+            break;
+        default:
+            fcsr &= ~RB[rs1];
+            break;
+    }
 }
 
 // Instruction SB behavior method
