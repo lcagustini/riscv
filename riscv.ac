@@ -26,6 +26,7 @@ AC_ARCH(riscv) {
 
   ARCH_CTOR(riscv) {
     ac_isa("riscv_isa.ac");
+    ac_adf("SBAC.adf");
     set_endian("little");
   };
 };

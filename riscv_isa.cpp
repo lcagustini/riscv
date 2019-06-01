@@ -396,7 +396,7 @@ void ac_behavior(SCALL) {
 void ac_behavior(SBREAK) {
     dbg_printf("SBREAK\n");
     printf("Breakpoint\n\n");
-    stop();
+    //stop();
 }
 
 // Instruction RDCYCLE behavior method.
@@ -1023,7 +1023,7 @@ void ac_behavior(FSQRT_S) {
     float temp;
     if (load_float(rs1) < 0) {
         dbg_printf("Invalid!");
-        stop();
+        //stop();
     } else
         RBF[rd] = sqrt(RBF[rs1]);
     dbg_printf("Result = %.3f\n\n", (float)RBF[rd]);
@@ -1356,7 +1356,7 @@ void ac_behavior(FSQRT_D) {
     double temp;
     if (load_double(rs1) < 0) {
         dbg_printf("Invalid!");
-        stop();
+        //stop();
     } else {
         temp = sqrt(load_double(rs1));
         save_double(temp, rd);

@@ -11,11 +11,9 @@
  * IC-UNICAMP                                         *
  * http://www.lsc.ic.unicamp.br                       *
  ******************************************************/
- 
 
 #include "vac_models.H"
 
-/*
 #include "EvoApprox8B/mul8_303.c"
 #include "EvoApprox8B/mul8_469.c"
 #include "EvoApprox8B/mul8_479.c"
@@ -23,104 +21,96 @@
 #include "EvoApprox8B/mul8_279.c"
 
 uint16_t mul8_accurate (uint8_t a, uint8_t b) {
-  return ((uint16_t)a) * ((uint16_t)b);
+    return ((uint16_t)a) * ((uint16_t)b);
 }
 
 uint16_t (*GetMul8(int m))(uint8_t, uint8_t) {
-  switch (m) {
-    case 303:
-      return mul8_303; break;
-    case 469:
-      return mul8_469; break;
-    case 479:
-      return mul8_479; break;
-    case 423:
-      return mul8_423; break;
-    case 279:
-      return mul8_279; break;
-    default:
-      return mul8_accurate; break;
-  }
+    switch (m) {
+        case 303:
+            return mul8_303; break;
+        case 469:
+            return mul8_469; break;
+        case 479:
+            return mul8_479; break;
+        case 423:
+            return mul8_423; break;
+        case 279:
+            return mul8_279; break;
+        default:
+            return mul8_accurate; break;
+    }
 }
 
-uint64_t Mul8Wallace(uint32_t in_a, uint32_t in_b, uint16_t (*mul8)(uint8_t, uint8_t), bool sign)
+uint64_t Mul8Wallace(uint32_t in_a, uint32_t in_b, uint16_t (*mul8)(uint8_t, uint8_t), bool signa, bool signb)
 {
-  bool sr = false;
-  if (sign && 0x80000000&in_a) {
-    in_a = (~in_a) + 1;
-    sr = !sr;
-  }
-  if (sign && 0x80000000&in_b) {
-    in_b = (~in_b) + 1;
-    sr = !sr;
-  }
-
-  uint64_t result = 0;
-  uint64_t partial_b[4] = { 0, 0, 0, 0 };
-  uint16_t b_x_a[4][4];
-
-  for (int i = 0; i < 4; i++) {
-    uint8_t byte_from_b = (in_b >> (8 * i)) & 0xff;
-    for (int j = 0; j < 4; j++) {
-      uint8_t byte_from_a = (in_a >> (8 * j)) & 0xff;
-      b_x_a[i][j] = mul8(byte_from_b, byte_from_a);
-      uint64_t mask = ~(uint64_t)0x0;
-      mask <<= 8 * (j + sizeof b_x_a[i][j]);
-      uint64_t prev = partial_b[i] & mask;
-      partial_b[i] += (uint64_t)b_x_a[i][j] << (8 * j);
-      partial_b[i] = prev | (partial_b[i] & ~mask);
+    bool sr = false;
+    if (signa && 0x80000000&in_a) {
+        in_a = (~in_a) + 1;
+        sr = !sr;
     }
-    uint64_t mask = ~(uint64_t)0x0;
-    if (i == 3) {
-      mask = 0x0;
-    } else {
-      mask <<= 8 * (i + 5);
+    if (signb && 0x80000000&in_b) {
+        in_b = (~in_b) + 1;
+        sr = !sr;
     }
-    uint64_t prev = result & mask;
-    result += partial_b[i] << (8 * i);
-    result = prev | (result & ~mask);
-  }
 
-  if (sr) {
-    result = (~result) + 1;
-  }
+    uint64_t result = 0;
+    uint64_t partial_b[4] = { 0, 0, 0, 0 };
+    uint16_t b_x_a[4][4];
 
-  return result;
+    for (int i = 0; i < 4; i++) {
+        uint8_t byte_from_b = (in_b >> (8 * i)) & 0xff;
+        for (int j = 0; j < 4; j++) {
+            uint8_t byte_from_a = (in_a >> (8 * j)) & 0xff;
+            b_x_a[i][j] = mul8(byte_from_b, byte_from_a);
+            uint64_t mask = ~(uint64_t)0x0;
+            mask <<= 8 * (j + sizeof b_x_a[i][j]);
+            uint64_t prev = partial_b[i] & mask;
+            partial_b[i] += (uint64_t)b_x_a[i][j] << (8 * j);
+            partial_b[i] = prev | (partial_b[i] & ~mask);
+        }
+        uint64_t mask = ~(uint64_t)0x0;
+        if (i == 3) {
+            mask = 0x0;
+        } else {
+            mask <<= 8 * (i + 5);
+        }
+        uint64_t prev = result & mask;
+        result += partial_b[i] << (8 * i);
+        result = prev | (result & ~mask);
+    }
+
+    if (sr) {
+        result = (~result) + 1;
+    }
+
+    return result;
 }
 
 VARCHC_MODEL_DM Float2HalfPrecision(source_t source,uint64_t& data){
-	// Implementation of Float2HalfPrecision
-  if (source.type == source_t::REGBANK && source.name == "RBF") {
-    uint32_t half = 0;
-    half = data & 0xC0000000;
-    if(data&0x40000000 && data&0x38000000) {
-      half |= 0x7F800000;
+    // Implementation of Float2HalfPrecision
+    if (source.type == source_t::REGBANK && source.name == "RBF") {
+        uint32_t half = 0;
+        half = data & 0xC0000000;
+        if(data&0x40000000 && data&0x38000000) {
+            half |= 0x7F800000;
+        }
+        else if ((data&0x40000000) || !((~data)&0x38000000)) {
+            half |= data&0x3FFFE000;
+        }
+        data = half;
     }
-    else if ((data&0x40000000) || !((~data)&0x38000000)) {
-      half |= data&0x3FFFE000;
-    }
-    data = half;
-  }
 }
 
-VARCHC_MODEL_IM EvoApprox8B(word a, word b, word hi, word lo, int mul, bool sign){
-	// Implementation of EvoApprox8B
-  uint16_t (*mul8)(uint8_t, uint8_t) = GetMul8(mul);
-  uint64_t result = Mul8Wallace(a, b, mul8, sign);
-  lo = (result & 0xFFFFFFFF);
-  hi = ((result>>32) & 0xFFFFFFFF);
+VARCHC_MODEL_IM EvoApprox8B(word a, word b, word r, int mul, bool signa, bool signb, bool high){
+    // Implementation of EvoApprox8B
+    uint16_t (*mul8)(uint8_t, uint8_t) = GetMul8(mul);
+    uint64_t result = Mul8Wallace(a, b, mul8, signa, signb);
+    if (high) r = ((result>>32) & 0xFFFFFFFF);
+    else r = (result & 0xFFFFFFFF);
 }
-
-VARCHC_MODEL_IM EvoApprox8B(word a, word b, word r, int mul, bool sign){
-	// Implementation of EvoApprox8B
-  uint16_t (*mul8)(uint8_t, uint8_t) = GetMul8(mul);
-  uint64_t result = Mul8Wallace(a, b, mul8, sign);
-  r = (result & 0xFFFFFFFF);
-}
-*/
 
 VARCHC_MODEL_EM simple_em(){
-	// Implementation of simple_em
-  return OP["scaling"];
+    // Implementation of simple_em
+    return OP["scaling"];
 }
 
